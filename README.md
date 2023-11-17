@@ -1,5 +1,5 @@
 # Mallard multistate model 
-Data and code to develop multistate model for mallards in the LMAV Multistate model identifies functional connectivity of spatial sanctuaries by mallards within a large protected area network (~12,000 ha)
+Data and code to develop multistate model for mallards in the LMAV Multistate model identifies functional connectivity of spatial sanctuaries by mallards within a large protected area network (~12,000 km2)
 
 ## Sponsorship
 This project is in collaboration with and  supported by the Tennessee Wildlife Resources Agency, U.S. Fish and Wildlife Service, Southeastern Region, and Tennessee Technological University. All rights reserved. 
