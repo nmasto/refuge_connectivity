@@ -15,8 +15,9 @@ reproducibility on any device.
 
 All necessary data and scripts in their associated folders:
 1. The "data" and "geo_data" folder contains necessary GPS and PAD-US spatial files in .RDS and .shp formats, respectively
-2. The "scripts" folder contains 6 required scripts to reproduce analysis in totality
-  - `DataPrep_MultistateModel.R` prepares daily encounter histories and calculates distance matrices (km) and sanctuary sizes (km2)
+2. The "scripts" folder contains 5 required scripts to reproduce analysis in totality
+  - `DataPrep_MultistateModel.R` prepares daily encounter histories and calculates distance matrices (km) and sanctuary sizes (km2). The `all_dat_oct2019_march2023.rds` is too large to upload. This file produces the         
+    `datum.rds` and `datum_dist.rds` needed for following scripts.
   - `ModelSpecification_multistate.R` specifies multistate model in R and writes it to .txt file
   - `Functions_MultistateModel.R` prepares custom functions needed for the Analyses
   - `Analyses_Mallard_MultistateModel.R` sources scripts, runs model (need `multistate.sh`), loads/processes results, and plots
