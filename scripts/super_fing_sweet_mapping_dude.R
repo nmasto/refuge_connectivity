@@ -50,7 +50,6 @@ us.p <- ggplot() +
   
 
 
-
 probs_datum <- read.csv("Results/ref_probs.csv") %>% 
   filter(sex == 1, age == 1) %>% 
   rename(Probability = psi) %>%

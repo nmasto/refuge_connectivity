@@ -9,8 +9,8 @@
 # Dependencies: "all_dat_oct2019_march2023.rds" & "spatial_sanctuary.shp"
 
 
-# Allison C Keever & Nick Masto
-# Tennessee Tech University
+# Allison Keever & Nick Masto
+# Tennessee Tech University, Cornell Lab of Ornithology
 # akeever@tntech.edu
 # GitHub: akeever2 & nmasto
 # Created: 5/5/21
@@ -115,6 +115,8 @@ datum <- tn_sf_refs_bbox %>%
   #datum$timestamp <- as_datetime(datum$timestamp)
 
 #saveRDS(datum, "data/datum.rds")
+
+#datum <- readRDS("data/datum.rds")
   
 # Last check on number of indiviudals
 datum %>% group_by(trackID)        # 398
@@ -253,7 +255,7 @@ dist_datum <- t(matrix(t(dist_datum)[which(!is.na(dist_datum))], nrow = 12,
 #str(dist_datum)
 #saveRDS(dist_datum, "data/dist_datum.rds")
 
-
+# Distance summary
 d <- data.frame(dist = c(11.2, 58.4, 39.8, 48.4, 34.6, 63.1, 79.4, 55.9, 4.98,
                          66.6, 1.35, 2.08, 55.5, 37.2, 43.9, 17.7, 45.7, 68.9,
                          38.5, 16.9, 52.1, 9.21, 15.7, 16.1, 8.70, 65.1, 76.9,

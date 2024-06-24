@@ -10,6 +10,8 @@ library(tidyverse)
 library(lubridate)
 library(sf)
 library(tidybayes)
+library(glmmTMB)
+library(DHARMa)
 
 # Read in data and change a few things for structure / formatting. Filter out 
 # locations above 36.5 latitude because they were not in our study area
@@ -35,7 +37,9 @@ datum <- datum %>%
            month(timestamp) %in% c(1,2,3) ~ Year - 1, 
            TRUE ~ Year)) %>% 
   group_split(trackID) %>%
-  map_df(~ .x %>% group_by(SeasonYear) %>% mutate(bird_yr = cur_group_id()) %>% ungroup()) %>%
+  map_df(~ .x %>% group_by(SeasonYear) %>% 
+           mutate(bird_yr = cur_group_id()) %>% 
+           ungroup()) %>%
   group_by(trackID, SeasonYear) %>%
   mutate(first_arrival = min(timestamp), 
          last_location = max(timestamp),
@@ -56,16 +60,25 @@ table(datum$refs_used)
 mean(datum$num_days)
 
 # Now run a model with # refuges used ~ number of days in area + first month here
-m1 <- glm(refs_used ~ num_days + first_month + num_yrs, family = "poisson", data = datum)
+m1 <- glmmTMB(refs_used ~ num_days + first_month + num_yrs, 
+              family = "truncated_poisson", 
+              data = datum)
 summary(m1)
+
+p1 <- ggplotify::as.ggplot(~plot(simulateResiduals(fittedModel = m1, plot = TRUE)))
+ggsave(filename = "Figures/QQplots.png", dpi = 600, width = 7, height = 5)
+
+
 data.frame(confint(m1)) %>% rename(low = "X2.5..",
                                    high = "X97.5..") %>%
-  mutate(odds_low_30d = exp(low * 30),
+  mutate(odds_est_30d = exp(Estimate * 30),
+         odds_low_30d = exp(low * 30),
          odds_high_30d = exp(high * 30))
 
 summary(datum$num_days)
+
 as.data.frame(
-  predict.glm(object = m1,
+  predict(object = m1,
               newdata = expand_grid(num_days = seq(0, 120, 5),
                                     first_month = factor(c(1, 2, 11, 12), levels = c("11", "12", "1", "2")), 
                                     num_yrs = factor(c(1,2))), 
@@ -77,6 +90,7 @@ as.data.frame(
   ggplot(aes(x = num_days, y = fit, ymin = fit - 1.96 * se.fit, 
              ymax = fit + 1.96 * se.fit))+
   geom_lineribbon(alpha = .2) +
+  geom_line(color = "black", size = 0.7) +
   facet_grid(num_yrs~first_month, 
              labeller = labeller(num_yrs = c('1' = "Capture year birds", 
                                              '2' = "Return birds"),
@@ -95,7 +109,7 @@ as.data.frame(
         panel.border = element_rect(color = "black", fill = NA))
 
 
-ggsave(filename = "Figures/numRefs.png", dpi = 600)
+ggsave(filename = "Figures/numRefs.png", dpi = 600, width = 7.5, height = 5)
 
 
 ggplot(data = datum, aes(refs_used)) + 

@@ -39,6 +39,8 @@ library(jagsUI)
 library(tidybayes)
 library(mcmcplots)
 library(superdiag)
+library(R2jags)
+library(jagshelper)
 
 # Run script to load and prep data
 source("scripts/DataPrep_MultistateModel.R")
@@ -130,22 +132,35 @@ save(out, file = "Results/FullMultStatMod_v500i.RData")
 
 load("Results/FullMultStatMod_v500i.RData") # this is actually 1000 iterations
 
-
 # Survival and capture probability
 out %>% gather_draws(phi, p) %>%
   mean_qi(.width = 0.9)
 
+# Traceplots 
+out %>% 
+  gather_draws(b0, b.dist, b.size1, b.size2, b.sex, b.age, phi, p, deviance) %>%
+  rename(Variable = .variable, 
+         Chain = .chain, 
+         Draw = .draw, 
+         Iteration = .iteration, 
+         Value = .value) %>% 
+  ggplot() +
+  facet_wrap(~Variable, scales = "free") +
+  geom_line(aes(x = Iteration, y = Value, color = as.factor(Chain)))+
+  theme_classic() +
+  theme(text = element_text(size = 13),
+        legend.position = "right") +
+  labs(color = "Chains")
 
-# Beta coefficients for probability of moving among sites
-out %>% gather_draws(b0, b.dist, b.size1, b.size2, b.sex, b.age) %>%
-  mean_qi(.width = c(.68, 0.9, 0.95))
+ggsave("Figures/Chains.png", dpi = 600)
+
+# Beta coefficients for probability of moving among sites  
 
 betas <- out %>%
   gather_draws(b0, b.dist, b.size1, b.size2, b.sex, b.age) %>%
   mean_qi(.width = c(.68, 0.9, 0.95)) %>%
   select(1:5) %>%
-  rename(Variable = .variable, Mean = .value, Lower = .lower, Upper = .upper) %>%
-  mutate()
+  rename(Variable = .variable, Mean = .value, Lower = .lower, Upper = .upper) 
 
 write.csv(betas, "Results/betas_90.csv")
 
@@ -246,7 +261,8 @@ age.label <- c('0' = "Juvenile", '1' = "Adult")
 # of these conventions (McElreath, 2018).
 
 
-p.size1 <- out %>% spread_draws(b.dist, b.size1, b.size2, b.sex, b.age, b0) %>%
+p.size1 <- out %>% 
+  spread_draws(b.dist, b.size1, b.size2, b.sex, b.age, b0) %>%
   expand_grid(pred_datum) %>%
   mutate(lp = b0 + b.dist * dist + b.size1 * size1 + b.size2 * size2 +
            b.sex * sex + b.age * age,
@@ -444,5 +460,5 @@ plotly::plot_ly(x = ~ dist, y = ~ size,
                 z = ~ prob) %>%
   plotly::add_surface()
 
-exp()
+
 
